@@ -28,13 +28,13 @@ export const Perception = {
                 // Call the LLM service to interpret intent
                 const llmInterpretation = await LLMService.interpretIntent(apiKey, message.type);
 
-                // Use the LLM result if valid and not blocked
-                if (llmInterpretation && !llmInterpretation.startsWith('Blocked:')) {
+                // Use the LLM result if valid and not blocked/error
+                if (llmInterpretation && !llmInterpretation.startsWith('Blocked:') && !llmInterpretation.startsWith('Error:') && !llmInterpretation.startsWith('API Error:')) {
                     perceivedIntent = llmInterpretation.trim(); // Use LLM interpretation
                     console.log("[Perception] LLM interpretation result:", perceivedIntent);
                 } else {
-                     console.warn("[Perception] LLM intent interpretation failed, was blocked, or returned empty.");
-                     // Keep the default intent if LLM fails
+                     // Log if LLM failed but keep default intent
+                     console.warn("[Perception] LLM intent interpretation failed, was blocked, or returned error:", llmInterpretation);
                 }
             } catch (error) {
                 console.error("[Perception] Error during LLM intent interpretation:", error);
@@ -51,7 +51,6 @@ export const Perception = {
             return {
                 action: "WANDER",       // The identified action
                 intent: perceivedIntent // The interpreted intent (default or from LLM)
-                // No complex page context needed for this specific extension
             };
         }
 

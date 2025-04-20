@@ -1,15 +1,16 @@
-// action.js - Performs the navigation action and updates history via Memory
+// action.js - Performs actions based on decisions. Navigation is no longer the primary action here.
 
-// Import Memory module to add to history after navigation
-import { Memory } from './memory.js';
+// Import Memory module (still needed if we were adding history here, but moved to background.js)
+// import { Memory } from './memory.js';
 
 export const Action = {
 
     /**
-     * Navigates the specified tab to the given URL and updates the history.
+     * (No longer used in main flow) Navigates the specified tab to the given URL.
+     * History update is now handled in background.js after decision.
      * @param {string} url - The URL to navigate to.
      * @param {number} tabId - The ID of the tab to navigate.
-     * @returns {Promise<boolean>} True if navigation was initiated successfully, false otherwise.
+     * @returns {Promise<boolean>} True if navigation was hypothetically initiated successfully, false otherwise.
      */
     async navigateToUrl(url, tabId) {
         // Validate inputs
@@ -17,22 +18,26 @@ export const Action = {
             console.error("[Action] URL or Tab ID missing/invalid for navigation.", { url, tabId });
             return false;
         }
-        console.log(`[Action] Navigating tab ${tabId} to URL: ${url}`);
+        console.log(`[Action] WOULD navigate tab ${tabId} to URL: ${url} (Navigation Disabled in current flow)`);
 
+        /* // --- Navigation Disabled ---
         try {
             // Use chrome.tabs API to update the tab's URL
-            await chrome.tabs.update(tabId, { url: url });
-            console.log("[Action] Navigation initiated successfully.");
+            // await chrome.tabs.update(tabId, { url: url });
+            console.log("[Action] Navigation step skipped.");
 
-            // IMPORTANT: Add the URL to history *after* successfully initiating navigation
-            // This assumes the navigation will likely succeed from Chrome's perspective.
-            await Memory.addToHistory(url);
+            // History update moved to background.js after decision is made
+            // await Memory.addToHistory(url);
 
-            return true; // Indicate success
+            return true; // Indicate hypothetical success
         } catch (error) {
-            // Log errors that might occur during navigation (e.g., invalid URL, tab closed)
-            console.error(`[Action] Error navigating tab ${tabId} to ${url}:`, error);
+            console.error(`[Action] Error during hypothetical navigation for tab ${tabId} to ${url}:`, error);
             return false; // Indicate failure
         }
+        */
+       // Return false as navigation didn't happen in the current workflow
+       return false;
     }
+
+    // Could add other actions here in the future if needed
 };

@@ -1,3 +1,5 @@
+// Handles saving and loading the optional API key
+
 const optionsForm = document.getElementById('options-form');
 const statusDiv = document.getElementById('status');
 
