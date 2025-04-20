@@ -1,117 +1,109 @@
-// background.js - Orchestrates the Web Wanderer flow using the cognitive layers
+// background.js - Orchestrates the LLM Puzzle Break using 4 Layers + History + Score + Types
 
-// Import the layers
 import { Memory } from './memory.js';
-import { Perception } from './perception.js';
-import { DecisionMaker } from './decision_making.js';
-import { Action } from './action.js'; // Action layer is now minimal for this flow
+import { PuzzlePerception } from './puzzle_perception.js';
+import { PuzzleDecisionMaker } from './puzzle_decision_making.js';
+import { PuzzleAction } from './puzzle_action.js';
+// LLMService is used by the Action layer
 
-console.log("Web Wanderer: Background service worker started.");
+console.log("LLM Puzzle Break: Background service worker started (4-Layer + History + Score + Types).");
 
-// --- Event Listeners ---
-
-// On extension install/update
 chrome.runtime.onInstalled.addListener(details => {
-    console.log("Web Wanderer installed or updated:", details.reason);
-    // Optionally pre-fetch the website database on install to cache it
-    Memory.getWebsiteDatabase().then(() => {
-        console.log("Initial website database fetch/cache attempt complete.");
-    });
+    console.log("LLM Puzzle Break installed or updated:", details.reason);
+    // Clear session storage on install/update
+    chrome.storage.session.remove([Memory.PUZZLE_HISTORY_KEY, Memory.SCORE_KEY]);
 });
 
-// Listen for messages from the popup script
+chrome.runtime.onStartup.addListener(() => {
+    console.log("Browser startup: Clearing puzzle history and score from session storage.");
+    // Clear session storage on browser startup
+    chrome.storage.session.remove([Memory.PUZZLE_HISTORY_KEY, Memory.SCORE_KEY]);
+});
+
+
+// Listen for messages from the popup
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    console.log("BACKGROUND: Received message:", message, "from sender:", sender);
-
-    // Handle the request to start the "wander" process
-    if (message.type === 'wanderRequest') {
-        // Query for the active tab when the request comes in
-        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-            // Handle potential errors during tab query
-            if (chrome.runtime.lastError) {
-                 console.error("BACKGROUND: Error querying active tab:", chrome.runtime.lastError);
-                 sendResponse({ status: "error", message: "Could not get active tab." });
-                 return; // Stop execution if tab query fails
-            }
-            // Check if any active tabs were found
-            if (tabs && tabs.length > 0) {
-                const activeTab = tabs[0];
-                console.log("BACKGROUND: Found active tab:", activeTab.id, activeTab.url);
-                // Call the main handler function, passing the active tab info
-                handleWanderRequest(activeTab, sendResponse);
-            } else {
-                // Handle case where no active tab is found
-                console.error("BACKGROUND: No active tab found.");
-                sendResponse({ status: "error", message: "No active tab identified." });
-            }
-        });
-        // Return true to indicate that sendResponse will be called asynchronously
-        return true;
-    }
-
-    // Handle other potential message types here if needed in the future
-
+    console.log("BACKGROUND: Received message:", message);
+    // Start the cognitive flow, passing sendResponse for async handling
+    handleRequest(message, sendResponse);
+    // Return true to indicate that sendResponse will be called asynchronously
+    return true;
 });
 
-// --- Core Handler Function ---
 
 /**
- * Handles the wander request by orchestrating the cognitive layers.
- * Sends the chosen site link back to the popup instead of navigating.
- * @param {chrome.tabs.Tab} activeTab - The currently active tab object (provides context).
- * @param {function} sendResponse - Callback function to send results back to the popup.
+ * Handles incoming requests from the popup by orchestrating the cognitive layers.
+ * Manages retrieval/storage of puzzle question history and score.
+ * @param {object} message - The message from the popup.
+ * @param {function} sendResponse - Callback function to send results back.
  */
-async function handleWanderRequest(activeTab, sendResponse) {
-    console.log(`BACKGROUND: Handling wander request (origin tab ${activeTab.id})...`);
+async function handleRequest(message, sendResponse) {
+    console.log("BACKGROUND: --- Starting Cognitive Flow ---");
+    let currentScore = 0; // Initialize score variable for this request cycle
 
     try {
-        // 1. Perception Layer - Interpret the request and get intent (potentially using LLM)
-        const userCategories = await Memory.getCategories(); // Get current categories first
-        // Pass the message type; preferences are used internally by LLM if needed
-        const perceived = await Perception.interpretRequest({ type: 'wanderRequest' }, userCategories);
+        // 1. Perception Layer
+        const perceivedRequest = PuzzlePerception.interpretRequest(message);
+        if (!perceivedRequest) { /* ... */ sendResponse({ status: "error", message: "Unknown request received." }); return; }
+        console.log("BACKGROUND: Perception Output:", perceivedRequest);
 
-        // Check if perception was successful and the action is correct
-        if (!perceived || perceived.action !== "WANDER") {
-            console.error("BACKGROUND: Perception failed to interpret wander request.");
-            sendResponse({ status: "error", message: "Could not interpret request." });
-            return; // Stop if perception fails
+        // --- History & Score Retrieval (before Decision/Action) ---
+        let askedHistory = [];
+        currentScore = await Memory.getScore(); // Get current score
+        console.log("BACKGROUND: Retrieved current score:", currentScore);
+
+        if (perceivedRequest.type === 'REQUEST_NEW_PUZZLE') {
+            askedHistory = await Memory.getPuzzleQuestionHistory();
+            console.log("BACKGROUND: Retrieved puzzle history for DecisionMaker:", askedHistory);
         }
-        console.log("BACKGROUND: Perception interpreted intent:", perceived.intent);
+        // --- End Retrieval ---
 
-        // 2. Memory Layer - Get necessary data (database and history)
-        const siteDatabase = await Memory.getWebsiteDatabase();
-        const history = await Memory.getHistory();
+        // 2. Decision-Making Layer - Pass history along
+        const actionPlan = PuzzleDecisionMaker.decideNextAction(perceivedRequest, askedHistory);
+        if (!actionPlan) { /* ... */ sendResponse({ status: "error", message: "Internal error: Could not decide action." }); return; }
+        console.log("BACKGROUND: DecisionMaker Output (Action Plan):", actionPlan);
 
-        // 3. Decision-Making Layer - Choose a website (potentially using LLM category expansion)
-        const decisionResult = await DecisionMaker.chooseWebsite(userCategories, siteDatabase, history);
-        const chosenSite = decisionResult.decision; // This is now {url, category} or null
+        // 3. Memory Layer (Get API Key)
+        const apiKey = await Memory.getApiKey();
 
-        // 4. Action Layer (Minimal) & Response Generation
-        if (chosenSite && chosenSite.url) {
-            // Successfully decided on a site
-            console.log(`BACKGROUND: Site chosen: ${chosenSite.url} (Category: ${chosenSite.category})`);
+        // 4. Action Layer
+        console.log("BACKGROUND: Executing action...");
+        const actionResult = await PuzzleAction.execute(actionPlan, apiKey);
+        console.log("BACKGROUND: Action Result:", actionResult);
 
-            // Add to history *after* deciding, before sending response
-            // This prevents the same site being immediately suggested again
-            await Memory.addToHistory(chosenSite.url);
+        // --- History & Score Update (after action) ---
+        let finalResponse = actionResult; // Start with the result from Action layer
 
-            // Send the chosen site object back to the popup
-            sendResponse({ status: "success", site: chosenSite });
-
-            // --- Navigation is NOT performed here ---
-            // const navigateSuccess = await Action.navigateToUrl(targetUrl, activeTab.id);
-
-        } else {
-            // If no URL was decided (e.g., no matching sites, all in history), report the reason back
-            console.warn(`BACKGROUND: No suitable site found. Reason: ${decisionResult.reason}`);
-            sendResponse({
-                status: decisionResult.reason || "error", // Use reason from decision maker (e.g., "no_sites")
-                message: decisionResult.message || "Could not find a suitable site." // Provide message if available
-            });
+        if (actionPlan.action === 'GENERATE_PUZZLE' && actionResult?.status === 'success' && actionResult.puzzle?.question) {
+            // Add newly generated question to history
+            await Memory.addPuzzleQuestionToHistory(actionResult.puzzle.question);
+            // Include current score in response when sending a new question
+            finalResponse.score = currentScore;
         }
-    } catch (error) {
-        // Catch any unexpected errors during the entire process
-        console.error("BACKGROUND: Unexpected error during handleWanderRequest:", error);
-        sendResponse({ status: "error", message: `An unexpected error occurred: ${error.message}` });
+        else if (actionPlan.action === 'EVALUATE_WITH_LLM' && actionResult?.status === 'success') {
+            // Increment score if the answer was correct
+            if (actionResult.result === 'Correct') {
+                currentScore = await Memory.incrementScore(); // Increment and get new score
+                console.log("BACKGROUND: Score incremented to:", currentScore);
+            }
+            // Include the potentially updated score in the evaluation response
+            finalResponse.score = currentScore;
+        }
+         // If action resulted in error, include current score anyway if needed
+         else if (actionResult?.status === 'error') {
+             finalResponse.score = currentScore;
+         }
+        // --- End History & Score Update ---
+
+
+        // 5. Send Response back to Popup
+        console.log("BACKGROUND: Sending final response to popup:", finalResponse);
+        sendResponse(finalResponse); // Send the potentially augmented result
+
+    } catch (error) { /* ... handle orchestration error ... */
+        console.error("BACKGROUND: Unexpected error during handleRequest orchestration:", error);
+        // Include current score even in case of unexpected error
+        sendResponse({ status: "error", message: `Orchestration error: ${error.message}`, score: currentScore });
     }
+    console.log("BACKGROUND: --- Cognitive Flow Complete ---");
 }

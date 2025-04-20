@@ -1,39 +1,33 @@
-// Handles saving and loading the optional API key
+// Handles saving and loading the API key
 
 const optionsForm = document.getElementById('options-form');
 const statusDiv = document.getElementById('status');
+const API_KEY_STORAGE_KEY = 'llmPuzzleApiKey'; // Use a specific key
 
 // Load saved API Key
 function loadOptions() {
-    // Only load API key now
-    chrome.storage.sync.get(['wandererApiKey'], (data) => {
+    chrome.storage.sync.get([API_KEY_STORAGE_KEY], (data) => {
         if (chrome.runtime.lastError) {
             console.error("Error loading options:", chrome.runtime.lastError);
             statusDiv.textContent = 'Error loading settings.';
             return;
         }
-        // Load API Key
-        document.getElementById('apiKey').value = data.wandererApiKey || '';
-        console.log('Wanderer options loaded (API Key only).');
+        document.getElementById('apiKey').value = data[API_KEY_STORAGE_KEY] || '';
+        console.log('LLM Puzzle options loaded.');
     });
 }
 
 // Save API Key
 function saveOptions(event) {
-    event.preventDefault(); // Prevent form submission
-
-    // Save API Key
+    event.preventDefault();
     const apiKey = document.getElementById('apiKey').value.trim();
 
-    // Save only the API key setting
-    chrome.storage.sync.set({
-        wandererApiKey: apiKey // Save the API key
-    }, () => {
+    chrome.storage.sync.set({ [API_KEY_STORAGE_KEY]: apiKey }, () => {
         if (chrome.runtime.lastError) {
             console.error("Error saving options:", chrome.runtime.lastError);
             statusDiv.textContent = 'Error saving settings.';
         } else {
-            console.log('Wanderer options saved (API key presence):', apiKey ? '***' : 'Not Set');
+            console.log('LLM Puzzle options saved (API key presence):', apiKey ? '***' : 'Not Set');
             statusDiv.textContent = 'Settings saved!';
             setTimeout(() => { statusDiv.textContent = ''; }, 3000);
         }

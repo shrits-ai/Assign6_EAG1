@@ -1,88 +1,67 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Web Wanderer</title>
+    <title>LLM Puzzle Break</title>
     <meta charset="UTF-8">
     <style>
-        body { font-family: sans-serif; width: 280px; /* Increased width slightly */ padding: 15px; font-size: 13px; }
-        h1 { font-size: 15px; margin: 0 0 10px 0; border-bottom: 1px solid #eee; padding-bottom: 5px; text-align: center;}
-        fieldset { border: 1px solid #ccc; padding: 5px 10px 10px 10px; margin-top: 10px; max-height: 150px; overflow-y: auto; }
-        legend { font-weight: bold; padding: 0 5px; font-size: 12px; }
-        label { display: block; margin-bottom: 5px; cursor: pointer; font-size: 12px; }
-        input[type="checkbox"] { margin-right: 5px; vertical-align: middle;}
-        button#wander-button {
-            width: 100%;
-            padding: 10px 15px;
-            font-size: 14px;
-            cursor: pointer;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            transition: background-color 0.2s ease;
-            margin-top: 15px;
-        }
-        button#wander-button:hover { background-color: #0056b3; }
-        button#wander-button:disabled { background-color: #ccc; cursor: not-allowed;}
-        #status { font-size: 12px; color: #666; margin-top: 10px; min-height: 1em; text-align: center;}
-        a#options-link { font-size: 11px; color: #007bff; text-decoration: none; float: right;}
-        a#options-link:hover { text-decoration: underline;}
-        /* Style for the result link area */
-        #result-link-area {
-            margin-top: 15px;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            background-color: #f9f9f9;
-            text-align: center;
-            display: none; /* Hidden by default */
-        }
-        #result-link-area span {
-            font-size: 11px;
-            color: #555;
-            display: block;
-            margin-bottom: 5px;
-        }
-        #result-link-area a {
-            font-weight: bold;
-            word-wrap: break-word; /* Break long URLs */
-        }
-        #result-category {
-             font-size: 11px;
-             color: #777;
-             font-style: italic;
-             margin-top: 3px;
-             display: block; /* Ensure it takes its own line */
-         }
+        /* Keep previous styles, add/modify below */
+        body { font-family: sans-serif; width: 380px; /* Wider */ padding: 0; margin: 0; display: flex; flex-direction: column; min-height: 300px; font-size: 14px; }
+        .header { padding: 8px 15px; background-color: #007bff; color: white; font-size: 15px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;}
+        #score-area { font-size: 0.9em; }
+        a#options-link { color: white; text-decoration: none; font-size: 18px; }
+        #game-area { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; padding: 15px; }
+        #question-area { background-color: #e9f5ff; border: 1px solid #b3d7ff; padding: 15px; margin-bottom: 15px; border-radius: 5px; min-height: 60px; display: flex; align-items: center; justify-content: center; text-align: center; font-weight: 500; color: #004085; }
+        #answer-input { width: calc(100% - 22px); padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+        #submit-button { width: 100%; padding: 10px; font-size: 14px; cursor: pointer; background-color: #007bff; color: white; border: none; border-radius: 4px; transition: background-color 0.2s ease; }
+        #feedback-area { margin-top: 15px; padding: 10px; border-radius: 4px; text-align: center; font-weight: bold; min-height: 1.5em; }
+        .feedback-correct { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .feedback-incorrect { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .feedback-error { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+        .feedback-incorrect span { font-weight: normal; display: block; font-size: 0.9em; margin-top: 5px;}
+        #controls-area { margin-top: 10px; padding: 10px 0; border-top: 1px solid #eee; text-align: center; display: flex; flex-direction: column; gap: 8px;}
+        .control-row { display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 5px; width: 100%;}
+        #controls-area button { padding: 6px 12px; font-size: 12px; cursor: pointer; border-radius: 4px; border: 1px solid #ccc;}
+        #controls-area button.difficulty-btn { background-color: #f0f0f0; border-color: #ccc; color: #333;}
+        #controls-area button.difficulty-btn.active { background-color: #6c757d; border-color: #5a6268; color: white; font-weight: bold;}
+        #controls-area button.play-again-btn { background-color: #28a745; border-color: #1e7e34; color: white; padding: 8px 15px;}
+        #controls-area button:disabled { background-color: #ccc; cursor: not-allowed; border-color: #bbb;}
+        .type-selection label { font-size: 12px; margin: 0 5px; cursor: pointer;}
+        .type-selection input[type="radio"] { margin-right: 3px; }
+        .loading { font-style: italic; color: #666; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
-    <h1>Web Wanderer <a href="#" id="options-link" title="Settings (API Key)">⚙️</a></h1>
+    <div class="header">
+        <span>LLM Puzzle Break</span>
+        <span id="score-area">Score: 0</span>
+        <a href="#" id="options-link" title="Settings (API Key)">⚙️</a>
+    </div>
 
-    <form id="categories-form">
-        <fieldset>
-            <legend>Select Interests</legend>
-            <div id="categories-container">
-                <label><input type="checkbox" name="categories" value="Art"> Art & Design</label>
-                <label><input type="checkbox" name="categories" value="Science"> Science & Nature</label>
-                <label><input type="checkbox" name="categories" value="Technology"> Technology</label>
-                <label><input type="checkbox" name="categories" value="History"> History</label>
-                <label><input type="checkbox" name="categories" value="Funny"> Funny & Amusing</label>
-                <label><input type="checkbox" name="categories" value="Weird"> Weird & Obscure</label>
-                <label><input type="checkbox" name="categories" value="Games"> Games</label>
-                <label><input type="checkbox" name="categories" value="Music"> Music</label>
-                <label><input type="checkbox" name="categories" value="Travel"> Travel</label>
-                </div>
-        </fieldset>
-    </form>
+    <div id="game-area">
+        <div id="question-area" class="loading">Loading puzzle...</div>
+        <input type="text" id="answer-input" placeholder="Your answer here..." disabled>
+        <button id="submit-button" disabled>Submit Answer</button>
+        <div id="feedback-area"></div>
+    </div>
 
-    <button id="wander-button">Find a Site!</button>
-    <div id="status">Select categories and find a site!</div>
-
-    <div id="result-link-area">
-        <span>Try this site:</span>
-        <a href="#" id="result-link" target="_blank"></a>
-        <span id="result-category"></span>
+    <div id="controls-area" class="hidden">
+         <div class="control-row">
+             <button class="play-again-btn">Play Again?</button>
+         </div>
+         <div class="control-row type-selection">
+             <span>Type:</span>
+             <label><input type="radio" name="puzzleType" value="Any" checked> Any</label>
+             <label><input type="radio" name="puzzleType" value="Trivia"> Trivia</label>
+             <label><input type="radio" name="puzzleType" value="Riddle"> Riddle</label>
+             <label><input type="radio" name="puzzleType" value="Logic"> Logic</label>
+             </div>
+         <div class="control-row">
+             <span>Difficulty:</span>
+             <button class="difficulty-btn active" data-difficulty="Easy">Easy</button>
+             <button class="difficulty-btn" data-difficulty="Medium">Medium</button>
+             <button class="difficulty-btn" data-difficulty="Hard">Hard</button>
+         </div>
     </div>
 
     <script src="popup.js"></script>

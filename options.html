@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Web Wanderer Options</title>
+    <title>LLM Puzzle Break Options</title>
     <meta charset="UTF-8">
     <style>
         body { font-family: sans-serif; padding: 15px; max-width: 500px; }
@@ -17,14 +17,13 @@
     </style>
 </head>
 <body>
-    <h1>Web Wanderer Settings</h1>
-    <p>Optional settings for enhanced features.</p>
+    <h1>LLM Puzzle Break Settings</h1>
     <form id="options-form">
         <fieldset>
-             <legend>Optional Enhancement</legend>
-             <label for="apiKey">Google AI API Key (Optional):</label>
+             <legend>API Configuration</legend>
+             <label for="apiKey">Google AI API Key:</label>
              <input type="password" id="apiKey" name="apiKey" placeholder="Paste your Gemini API key here">
-             <small>Needed for enhanced category suggestions. Keep this secure. <strong style="color: red;">Warning: Storing keys this way is insecure for published extensions. Personal use only.</strong></small>
+             <small>Required to generate puzzles and evaluate answers. Keep this secure. <strong style="color: red;">Warning: Storing keys this way is insecure for published extensions. Personal use only.</strong></small>
         </fieldset>
 
         <button type="submit">Save Settings</button>
