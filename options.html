@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Web Wanderer Options</title>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: sans-serif; padding: 15px; max-width: 500px; }
+        h1 { font-size: 18px; margin-bottom: 15px; }
+        fieldset { border: 1px solid #ccc; padding: 10px 15px; margin-top: 15px; }
+        legend { font-weight: bold; padding: 0 5px; }
+        label { display: block; margin-top: 10px; font-weight: bold;}
+        input[type="password"] { width: 95%; padding: 8px; margin-top: 4px; border: 1px solid #ccc; }
+        button { padding: 10px 15px; margin-top: 20px; background-color: #28a745; color: white; border: none; cursor: pointer; border-radius: 4px; }
+        button:hover { background-color: #218838; }
+        #status { margin-top: 15px; color: green; font-weight: bold; }
+        small { color: #555; font-size: 11px; display: block; margin-top: 3px;}
+    </style>
+</head>
+<body>
+    <h1>Web Wanderer Settings</h1>
+    <p>Optional settings for enhanced features.</p>
+    <form id="options-form">
+        <fieldset>
+             <legend>Optional Enhancement</legend>
+             <label for="apiKey">Google AI API Key (Optional):</label>
+             <input type="password" id="apiKey" name="apiKey" placeholder="Paste your Gemini API key here">
+             <small>Needed for enhanced category suggestions. Keep this secure. <strong style="color: red;">Warning: Storing keys this way is insecure for published extensions. Personal use only.</strong></small>
+        </fieldset>
+
+        <button type="submit">Save Settings</button>
+    </form>
+    <div id="status"></div>
+
+    <script src="options.js"></script>
+</body>
+</html>

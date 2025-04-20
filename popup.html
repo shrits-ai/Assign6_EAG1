@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Web Wanderer</title>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: sans-serif; width: 250px; padding: 15px; font-size: 13px; }
+        h1 { font-size: 15px; margin: 0 0 10px 0; border-bottom: 1px solid #eee; padding-bottom: 5px; text-align: center;}
+        fieldset { border: 1px solid #ccc; padding: 5px 10px 10px 10px; margin-top: 10px; max-height: 150px; overflow-y: auto; }
+        legend { font-weight: bold; padding: 0 5px; font-size: 12px; }
+        label { display: block; margin-bottom: 5px; cursor: pointer; font-size: 12px; }
+        input[type="checkbox"] { margin-right: 5px; vertical-align: middle;}
+        button#wander-button {
+            width: 100%;
+            padding: 10px 15px;
+            font-size: 14px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.2s ease;
+            margin-top: 15px;
+        }
+        button#wander-button:hover { background-color: #0056b3; }
+        button#wander-button:disabled { background-color: #ccc; cursor: not-allowed;}
+        #status { font-size: 12px; color: #666; margin-top: 10px; min-height: 1em; text-align: center;}
+        a#options-link { font-size: 11px; color: #007bff; text-decoration: none; float: right;}
+        a#options-link:hover { text-decoration: underline;}
+    </style>
+</head>
+<body>
+    <h1>Web Wanderer <a href="#" id="options-link" title="Settings (API Key)">⚙️</a></h1>
+
+    <form id="categories-form">
+        <fieldset>
+            <legend>Select Interests</legend>
+            <div id="categories-container">
+                <label><input type="checkbox" name="categories" value="Art"> Art & Design</label>
+                <label><input type="checkbox" name="categories" value="Science"> Science & Nature</label>
+                <label><input type="checkbox" name="categories" value="Technology"> Technology</label>
+                <label><input type="checkbox" name="categories" value="History"> History</label>
+                <label><input type="checkbox" name="categories" value="Funny"> Funny & Amusing</label>
+                <label><input type="checkbox" name="categories" value="Weird"> Weird & Obscure</label>
+                <label><input type="checkbox" name="categories" value="Games"> Games</label>
+                <label><input type="checkbox" name="categories" value="Music"> Music</label>
+                <label><input type="checkbox" name="categories" value="Travel"> Travel</label> </div>
+        </fieldset>
+    </form>
+
+    <button id="wander-button">Save & Wander!</button>
+    <div id="status">Select categories and wander!</div>
+
+    <script src="popup.js"></script>
+</body>
+</html>

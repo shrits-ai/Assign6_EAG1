@@ -1,0 +1,47 @@
+{
+    "categories": [
+      "Art",
+      "Science",
+      "Technology",
+      "History",
+      "Funny",
+      "Weird",
+      "Games",
+      "Music",
+      "Travel"
+    ],
+    "sites": [
+      { "url": "https://www.thisiscolossal.com/", "category": "Art" },
+      { "url": "https://mymodernmet.com/category/art/", "category": "Art" },
+      { "url": "https://www.booooooom.com/", "category": "Art" },
+      { "url": "https://apod.nasa.gov/apod/astropix.html", "category": "Science" },
+      { "url": "https://www.quantamagazine.org/", "category": "Science" },
+      { "url": "https://nautil.us/", "category": "Science" },
+      { "url": "https://waitbutwhy.com/", "category": "Science" },
+      { "url": "https://www.livescience.com/", "category": "Science" },
+      { "url": "https://news.ycombinator.com/", "category": "Technology"},
+      { "url": "https://www.theverge.com/tech", "category": "Technology"},
+      { "url": "https://techcrunch.com/", "category": "Technology"},
+      { "url": "https://arstechnica.com/", "category": "Technology"},
+      { "url": "https://archive.org/web/", "category": "History"},
+      { "url": "https://www.history.com/this-day-in-history", "category": "History"},
+      { "url": "https://www.eyewitnesstohistory.com/", "category": "History"},
+      { "url": "https://theoatmeal.com/", "category": "Funny" },
+      { "url": "https://xkcd.com/", "category": "Funny" },
+      { "url": "http://hyperboleandahalf.blogspot.com/", "category": "Funny" },
+      { "url": "https://www.mcsweeneys.net/tendency", "category": "Funny" },
+      { "url": "https://www.atlasobscura.com/", "category": "Weird"},
+      { "url": "https://www.boredpanda.com/", "category": "Funny"},
+      { "url": "https://pointerpointer.com/", "category": "Weird"},
+      { "url": "https://neal.fun/", "category": "Weird"},
+      { "url": "https://window-swap.com/", "category": "Weird"},
+      { "url": "https://itch.io/games/free", "category": "Games"},
+      { "url": "https://www.rockpapershotgun.com/", "category": "Games"},
+      { "url": "https://bandcamp.com/discover", "category": "Music"},
+      { "url": "https://pitchfork.com/", "category": "Music"},
+      { "url": "https://everynoise.com/", "category": "Music"},
+      { "url": "https://www.lonelyplanet.com/", "category": "Travel"},
+      { "url": "https://wikivoyage.org/", "category": "Travel"}
+    ]
+  }
+  
