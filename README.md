@@ -57,11 +57,4 @@ The extension uses a simple 4-layer cognitive model in its background script (`b
 
 ⚠️ Storing the Google AI API key via the Options page (in `chrome.storage.sync`) is **not secure** for published or shared extensions. This method is intended for **personal development and use only**. If you were to distribute this extension, you would need to implement a secure method for handling API keys, such as user authentication (OAuth) or routing requests through a secure backend proxy server that holds the key.
 
-## Future Enhancements
-
-* More sophisticated LLM integration (e.g., classifying sites, checking site safety, thematic novelty).
-* Allow users to add/remove sites from the database via the UI.
-* Option to fetch `sites.json` from a remote URL for easier updates.
-* Visual indication of which category the wandered site belongs to.
-* Improved UI/UX.
 
